@@ -1,0 +1,6 @@
+# The real device config (M1), with dummy secrets from this directory.
+substitutions:
+  components_dir: ../../firmware/components
+
+packages:
+  device: !include ../../firmware/co-sensor-01.yaml

@@ -1,0 +1,16 @@
+# One CO sensor device. Device files only pick a name and compose packages;
+# all behaviour lives in common/, boards/, modules/ and integrations/.
+substitutions:
+  name: co-sensor-01
+  friendly_name: CO Sensor 01
+
+packages:
+  base: !include common/base.yaml
+  board: !include boards/xiao-esp32c6.yaml
+  co: !include modules/ze15.yaml
+  # M3: enable once the display is connected (the driver waits on BUSY, so don't
+  # enable it without the panel attached).
+  # display: !include modules/epd-1in54.yaml
+
+  # Optional consumers of the sensor's readings. Remove for a standalone device.
+  home_assistant: !include integrations/home-assistant.yaml

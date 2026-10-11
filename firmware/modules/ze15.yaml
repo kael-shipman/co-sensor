@@ -1,0 +1,38 @@
+# Winsen ZE15-CO carbon monoxide module.
+# Requires substitutions: components_dir, pin_co_rx.
+#
+# Publishes `co_ppm` and `co_fault`; other modules (e.g. the display) consume
+# those ids and never talk to the sensor directly.
+external_components:
+  - source:
+      type: local
+      path: ${components_dir}
+    components: [ze15_co]
+
+uart:
+  - id: ze15_uart
+    rx_pin: ${pin_co_rx}
+    baud_rate: 9600
+
+ze15_co:
+  id: ze15
+  uart_id: ze15_uart
+
+sensor:
+  - platform: ze15_co
+    ze15_co_id: ze15
+    carbon_monoxide:
+      id: co_ppm
+      name: Carbon monoxide
+      filters:
+        # The module reports every second; average to smooth noise and keep
+        # downstream consumers (display, integrations) from churning.
+        # NaN (fault/timeout) passes straight through.
+        - throttle_average: 5s
+
+binary_sensor:
+  - platform: ze15_co
+    ze15_co_id: ze15
+    fault:
+      id: co_fault
+      name: CO sensor fault

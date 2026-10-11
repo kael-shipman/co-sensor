@@ -1,0 +1,3 @@
+# ESPHome writes a .gitignore into config directories that lack one; this is ours.
+/.esphome/
+/secrets.yaml

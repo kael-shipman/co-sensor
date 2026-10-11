@@ -1,0 +1,11 @@
+# A self-contained device: sensor + display, no integrations. Guards against any
+# module quietly depending on Home Assistant.
+substitutions:
+  name: co-sensor-standalone
+  components_dir: ../../firmware/components
+
+packages:
+  base: !include ../../firmware/common/base.yaml
+  board: !include ../../firmware/boards/xiao-esp32c6.yaml
+  co: !include ../../firmware/modules/ze15.yaml
+  display: !include ../../firmware/modules/epd-1in54.yaml

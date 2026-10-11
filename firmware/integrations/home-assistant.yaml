@@ -1,0 +1,20 @@
+# Optional: exposes the device's entities to Home Assistant via the ESPHome native API.
+# The device works the same without this package; it only adds a consumer.
+api:
+  encryption:
+    key: !secret api_encryption_key
+  # ESPHome reboots after 15 min without an API client by default; the sensor's job
+  # doesn't depend on Home Assistant being up.
+  reboot_timeout: 0s
+
+sensor:
+  - platform: wifi_signal
+    name: Wi-Fi signal
+    update_interval: 60s
+  - platform: uptime
+    name: Uptime
+    entity_category: diagnostic
+
+button:
+  - platform: restart
+    name: Restart

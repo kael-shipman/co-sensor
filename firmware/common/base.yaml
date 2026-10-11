@@ -1,0 +1,41 @@
+# Shared by every device: identity, connectivity, clock.
+# Requires substitutions: name.
+#
+# The device is self-contained: it reads the sensor and drives its display without
+# any network. Wi-Fi only enables OTA updates, a clock (SNTP) and optional integrations
+# (firmware/integrations/), so nothing here may reboot the device for being offline.
+substitutions:
+  friendly_name: CO Sensor
+  # Relative to the top-level config file; tests/firmware overrides it.
+  components_dir: components
+
+esphome:
+  name: ${name}
+  friendly_name: ${friendly_name}
+  project:
+    name: kael-shipman.co-sensor
+    version: "0.1.0"
+
+logger:
+  level: DEBUG
+
+ota:
+  - platform: esphome
+    password: !secret ota_password
+
+wifi:
+  ssid: !secret wifi_ssid
+  password: !secret wifi_password
+  # ESPHome reboots after 15 min without Wi-Fi by default; a standalone sensor must not.
+  reboot_timeout: 0s
+  ap:
+    ssid: ${name}
+    password: !secret fallback_ap_password
+
+captive_portal:
+
+# Used by the display to show when it last refreshed. Point `servers:` at a local
+# NTP server if the device's network has no internet access.
+time:
+  - platform: sntp
+    id: sntp_time

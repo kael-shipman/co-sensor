@@ -1,0 +1,56 @@
+# Waveshare 1.54" e-Paper Module V2 (200x200, black/white, SSD1681).
+# Requires substitutions: pin_spi_clk, pin_spi_mosi, pin_epd_cs, pin_epd_dc,
+# pin_epd_reset, pin_epd_busy. Reads `co_ppm` and `co_fault` from modules/ze15.yaml
+# and `sntp_time` from common/base.yaml.
+#
+# E-ink keeps its last image when the device dies, so the screen always shows when
+# it was last refreshed; a stale timestamp is how you spot a dead device.
+spi:
+  - id: epd_spi
+    clk_pin: ${pin_spi_clk}
+    mosi_pin: ${pin_spi_mosi}
+
+font:
+  - id: font_reading
+    file: "gfonts://Roboto Condensed@700"
+    size: 96
+    glyphs: "0123456789.-"
+  - id: font_status
+    file: "gfonts://Roboto Condensed@700"
+    size: 28
+  - id: font_small
+    file: "gfonts://Roboto Condensed"
+    size: 18
+
+display:
+  - platform: waveshare_epaper
+    id: epd
+    spi_id: epd_spi
+    model: 1.54inv2
+    cs_pin: ${pin_epd_cs}
+    dc_pin: ${pin_epd_dc}
+    reset_pin: ${pin_epd_reset}
+    busy_pin: ${pin_epd_busy}
+    update_interval: 30s
+    # Partial refreshes in between; a full refresh clears ghosting.
+    full_update_every: 20
+    lambda: |-
+      const int cx = it.get_width() / 2;
+      it.print(cx, 6, id(font_small), TextAlign::TOP_CENTER, "CARBON MONOXIDE");
+
+      const float ppm = id(co_ppm).state;
+      if (id(co_fault).state) {
+        it.print(cx, 95, id(font_status), TextAlign::CENTER, "SENSOR FAULT");
+      } else if (!id(co_ppm).has_state() || std::isnan(ppm)) {
+        it.print(cx, 95, id(font_status), TextAlign::CENTER, "WARMING UP");
+      } else {
+        it.printf(cx, 90, id(font_reading), TextAlign::CENTER, "%.0f", ppm);
+        it.print(cx, 150, id(font_small), TextAlign::TOP_CENTER, "ppm");
+      }
+
+      auto now = id(sntp_time).now();
+      if (now.is_valid()) {
+        it.strftime(cx, it.get_height() - 4, id(font_small), TextAlign::BOTTOM_CENTER, "updated %H:%M", now);
+      } else {
+        it.print(cx, it.get_height() - 4, id(font_small), TextAlign::BOTTOM_CENTER, "no clock");
+      }

@@ -1,0 +1,46 @@
+# Seeed Studio XIAO ESP32-C6.
+#
+# Maps the project's logical pin roles (docs/wiring.md) to this board's GPIOs.
+# Display pins match Seeed's ePaper Driver Board for XIAO, so the same firmware runs
+# on that board and on our own PCB.
+# To move to another board, add a sibling file that defines the same substitutions
+# and swap the `board:` package in the device file; nothing else changes.
+substitutions:
+  pin_co_rx: GPIO17      # D7  <- ZE15 pin 8 (TXD)
+  pin_co_tx: GPIO16      # D6  -> ZE15 pin 7 (RXD) via 1k; unused while the module streams
+  pin_spi_clk: GPIO19    # D8  -> display CLK
+  pin_spi_mosi: GPIO18   # D10 -> display DIN
+  pin_epd_reset: GPIO0   # D0  -> display RST
+  pin_epd_cs: GPIO1      # D1  -> display CS
+  pin_epd_busy: GPIO2    # D2  <- display BUSY
+  pin_epd_dc: GPIO21     # D3  -> display DC
+  pin_i2c_sda: GPIO22    # D4  reserved for expansion (Qwiic)
+  pin_i2c_scl: GPIO23    # D5  reserved for expansion (Qwiic)
+  pin_spare: GPIO20      # D9  spare (ZE15 fault output or a button)
+
+esp32:
+  board: seeed_xiao_esp32c6
+  variant: esp32c6
+  framework:
+    type: esp-idf
+
+# UART0's default pins are D6/D7, which the ZE15 uses; keep logs on native USB.
+logger:
+  hardware_uart: USB_SERIAL_JTAG
+
+# The antenna RF switch is powered by GPIO3 (active low); GPIO14 low selects the
+# on-board ceramic antenna (high = U.FL).
+output:
+  - platform: gpio
+    id: rf_switch_power
+    pin: GPIO3
+  - platform: gpio
+    id: rf_antenna_select
+    pin: GPIO14
+
+esphome:
+  on_boot:
+    priority: 800
+    then:
+      - output.turn_off: rf_switch_power
+      - output.turn_off: rf_antenna_select

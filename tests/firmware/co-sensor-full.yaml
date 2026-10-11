@@ -1,0 +1,9 @@
+# The real device config plus every optional module, so modules that aren't enabled
+# on any device yet (e.g. the M3 display) still get validated and compiled.
+substitutions:
+  name: co-sensor-full
+  components_dir: ../../firmware/components
+
+packages:
+  device: !include ../../firmware/co-sensor-01.yaml
+  display: !include ../../firmware/modules/epd-1in54.yaml

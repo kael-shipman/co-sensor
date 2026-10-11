@@ -1,0 +1,4 @@
+# Host-side test builds
+/build/
+
+__pycache__/
