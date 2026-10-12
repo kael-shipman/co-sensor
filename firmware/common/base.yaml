@@ -12,6 +12,10 @@ substitutions:
 esphome:
   name: ${name}
   friendly_name: ${friendly_name}
+  # Every unit runs the same image and appends the last 6 hex digits of its MAC at
+  # boot (co-sensor-3fa2c1, "CO Sensor 3fa2c1"), so units never collide on a network
+  # or in Home Assistant, and keep their identity across reflashes.
+  name_add_mac_suffix: true
   project:
     name: kael-shipman.co-sensor
     version: "0.1.0"
@@ -28,8 +32,8 @@ wifi:
   password: !secret wifi_password
   # ESPHome reboots after 15 min without Wi-Fi by default; a standalone sensor must not.
   reboot_timeout: 0s
+  # The hotspot's SSID defaults to the suffixed device name.
   ap:
-    ssid: ${name}
     password: !secret fallback_ap_password
 
 captive_portal:

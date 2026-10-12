@@ -1,0 +1,103 @@
+# Tracks the age of the CO cell so it gets replaced on schedule. Electrochemical cells
+# lose sensitivity whether or not they're powered (see docs/maintenance.md).
+# Requires `sntp_time` from common/base.yaml. Publishes `co_cell_age` (days) and
+# `co_cell_replacement_due`.
+#
+# The state lives on the device (flash), not in any integration, so it survives
+# Home Assistant being down or replaced and the display can warn on its own.
+# Flash storage is keyed by entity name: renaming these entities forgets their values.
+
+datetime:
+  - platform: template
+    type: date
+    id: co_cell_installed
+    name: CO sensor installed
+    entity_category: config
+    optimistic: true
+    restore_value: true
+    # Placeholder meaning "not recorded yet" (any year before 2019); the first clock
+    # sync after flashing replaces it with that day's date.
+    initial_value: "2000-01-01"
+    on_value:
+      - component.update: co_cell_age
+
+number:
+  - platform: template
+    id: co_cell_service_life
+    name: CO sensor service life
+    entity_category: config
+    optimistic: true
+    restore_value: true
+    # Lower end of Winsen's 3-5 year rating: err towards replacing early.
+    initial_value: 3
+    min_value: 1
+    max_value: 7
+    step: 0.5
+    unit_of_measurement: years
+    mode: box
+
+sensor:
+  - platform: template
+    id: co_cell_age
+    name: CO sensor age
+    unit_of_measurement: d
+    device_class: duration
+    state_class: measurement
+    accuracy_decimals: 0
+    entity_category: diagnostic
+    update_interval: 1h
+    lambda: |-
+      ESPTime installed = id(co_cell_installed).state_as_esptime();
+      ESPTime today = id(sntp_time).now();
+      if (installed.year < 2019 || !today.is_valid())
+        return NAN;
+      // Whole days between two calendar dates. Both are pinned to noon UTC so time
+      // zones and DST can't shift the count.
+      for (ESPTime *t : {&installed, &today}) {
+        t->hour = 12;
+        t->minute = 0;
+        t->second = 0;
+        t->recalc_timestamp_utc(false);
+      }
+      return (today.timestamp - installed.timestamp) / 86400;
+
+binary_sensor:
+  - platform: template
+    id: co_cell_replacement_due
+    name: CO sensor replacement due
+    device_class: problem
+    lambda: |-
+      const float age = id(co_cell_age).state;
+      if (std::isnan(age))
+        return {};
+      return age >= id(co_cell_service_life).state * 365.25f;
+
+button:
+  - platform: template
+    name: CO sensor replaced
+    entity_category: config
+    on_press:
+      - script.execute: record_co_cell_installed_today
+
+interval:
+  # Records the install date on the first clock sync after flashing.
+  - interval: 1min
+    then:
+      - if:
+          condition:
+            lambda: "return id(co_cell_installed).year < 2019 && id(sntp_time).now().is_valid();"
+          then:
+            - script.execute: record_co_cell_installed_today
+
+script:
+  - id: record_co_cell_installed_today
+    then:
+      - lambda: |-
+          ESPTime today = id(sntp_time).now();
+          if (!today.is_valid()) {
+            ESP_LOGW("co_lifecycle", "No clock yet; set the CO sensor install date manually");
+            return;
+          }
+          id(co_cell_installed).make_call().set_date(today).perform();
+          ESP_LOGI("co_lifecycle", "CO sensor install date set to %04u-%02u-%02u", today.year, today.month,
+                   today.day_of_month);

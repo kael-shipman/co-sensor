@@ -26,17 +26,18 @@ later milestones from forcing rework.
 
 ```
 firmware/
-  co-sensor-01.yaml               one device: a name + a list of packages
+  co-sensor.yaml                  the product: a name + a list of packages
   common/base.yaml                identity, Wi-Fi, OTA, clock (every device)
   boards/xiao-esp32c6.yaml        logical pin roles -> this board's GPIOs
   modules/ze15.yaml               the CO sensor; publishes `co_ppm` and `co_fault`
-  modules/epd-1in54.yaml          the display; consumes `co_ppm` and `co_fault`
+  modules/co-lifecycle.yaml       CO cell install date, age and replacement-due flag
+  modules/epd-1in54.yaml          the display; consumes `co_ppm`, `co_fault`, replacement-due
   integrations/home-assistant.yaml  optional: ESPHome native API for Home Assistant
   components/ze15_co/             ESPHome external component for the ZE15-CO
 tests/
   unit/                           host-side tests for the ZE15 protocol parser
   firmware/                       configs that validate/compile the firmware with dummy secrets
-docs/                             plan, wiring, bill of materials, bring-up, integrations
+docs/                             plan, wiring, bill of materials, bring-up, maintenance, integrations
 hardware/  enclosure/             M2 and M4 (constraints so far)
 ```
 
@@ -61,6 +62,11 @@ make run PORT=/dev/ttyACM0     # first flash over USB; later `make run` flashes 
 make logs PORT=/dev/ttyACM0    # follow logs over USB (over Wi-Fi needs the HA/API integration)
 ```
 
+Every unit runs the same image and names itself at boot from its MAC address, e.g.
+`co-sensor-3fa2c1` (hostname, fallback hotspot and Home Assistant device alike). Building
+a second sensor needs no new config. `make run` and `make logs` find units on the network
+by mDNS; if several are online, ESPHome asks which one.
+
 For Home Assistant, see [docs/integrations/home-assistant.md](docs/integrations/home-assistant.md).
 
 ## Tests
@@ -74,7 +80,7 @@ make compile    # full firmware builds (first run downloads the ESP-IDF toolchai
   frame decoding (fault bit, decimal scaling, Q&A frames, foreign gas types) and stream
   resynchronisation (garbage, truncated frames, checksum errors, `0xFF` in payloads).
 - `tests/firmware/` builds:
-  - `co-sensor-01`: the real device config;
+  - `co-sensor`: the real device config;
   - `co-sensor-full`: the real device plus every optional module (so the display is
     compile-checked before any device enables it);
   - `co-sensor-standalone`: sensor + display with **no** integrations, which guards
@@ -88,3 +94,8 @@ The ZE15 module publishes two values, which the display and any integration cons
 |---|---|
 | `co_ppm` | CO in ppm, 0.1 resolution, averaged over 5 s. NaN (unknown) during the 60 s warm-up, while the module reports a fault, and when no valid frame has arrived for 10 s, so a dead sensor never reads as "0 ppm". |
 | `co_fault` | On when the module reports a fault or has stopped reporting. |
+
+The CO cell is a consumable that ages even unpowered, so `modules/co-lifecycle.yaml`
+keeps its install date in the device's flash. It publishes `co_cell_age` (days) and
+`co_cell_replacement_due`, with a "replaced" button and an editable service life. See
+[docs/maintenance.md](docs/maintenance.md).

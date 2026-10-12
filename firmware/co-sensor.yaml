@@ -1,13 +1,16 @@
-# One CO sensor device. Device files only pick a name and compose packages;
-# all behaviour lives in common/, boards/, modules/ and integrations/.
+# The CO sensor product: one firmware image for every unit. Each unit names itself
+# at boot by appending its MAC suffix (see common/base.yaml), e.g. co-sensor-3fa2c1.
+# Device files only pick a name and compose packages; all behaviour lives in
+# common/, boards/, modules/ and integrations/.
 substitutions:
-  name: co-sensor-01
-  friendly_name: CO Sensor 01
+  name: co-sensor
+  friendly_name: CO Sensor
 
 packages:
   base: !include common/base.yaml
   board: !include boards/xiao-esp32c6.yaml
   co: !include modules/ze15.yaml
+  co_lifecycle: !include modules/co-lifecycle.yaml
   # M3: enable once the display is connected (the driver waits on BUSY, so don't
   # enable it without the panel attached).
   # display: !include modules/epd-1in54.yaml

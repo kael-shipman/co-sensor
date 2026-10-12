@@ -3,4 +3,4 @@ substitutions:
   components_dir: ../../firmware/components
 
 packages:
-  device: !include ../../firmware/co-sensor-01.yaml
+  device: !include ../../firmware/co-sensor.yaml

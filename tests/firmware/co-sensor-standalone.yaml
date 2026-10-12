@@ -8,4 +8,5 @@ packages:
   base: !include ../../firmware/common/base.yaml
   board: !include ../../firmware/boards/xiao-esp32c6.yaml
   co: !include ../../firmware/modules/ze15.yaml
+  co_lifecycle: !include ../../firmware/modules/co-lifecycle.yaml
   display: !include ../../firmware/modules/epd-1in54.yaml

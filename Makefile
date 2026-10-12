@@ -18,7 +18,7 @@ ESPHOME = docker run --rm \
 
 # For run/logs: which device file in firmware/, and optionally a serial port
 # (e.g. PORT=/dev/ttyACM0). Without PORT, ESPHome uses OTA/the network.
-DEVICE ?= co-sensor-01
+DEVICE ?= co-sensor
 PORT ?=
 
 ESPHOME_DEVICE = docker run --rm -it --network host \

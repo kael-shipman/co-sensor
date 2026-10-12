@@ -29,13 +29,15 @@ mostly copies a design that already works instead of introducing new decisions.
 | Power | USB-C on the XIAO feeds the ZE15 from the 5V pin | Simplest. **To verify in M1:** the ZE15 is specced for ≥ 5 V. |
 | Autonomy | Self-contained device; integrations are optional packages | It measures and displays with no network. Wi-Fi and API reboot timeouts are disabled so being offline never interrupts measurement. |
 | Integrations | Home Assistant via the ESPHome API, in `firmware/integrations/` | One consumer of `co_ppm`/`co_fault` among possible others (MQTT, web server). Alerting logic lives in the consumer; see [Home Assistant](integrations/home-assistant.md). |
-| Clock | SNTP over Wi-Fi | Only for the display's "updated" timestamp. Doesn't depend on HA; shows "no clock" when offline. |
+| Cell lifecycle | Install date, service life and age kept in device flash; HA can edit them | The cell ages even unpowered and can't be recalibrated without test gas, so it's replaced on a schedule. Keeping the state on the device keeps it standalone. See [maintenance](maintenance.md). |
+| Clock | SNTP over Wi-Fi | For the display's "updated" timestamp and cell-age tracking. Doesn't depend on HA; shows "no clock" when offline. |
 
 ## Open questions
 
 - **Offline liveness on the display.** Without Wi-Fi there's no clock, so a frozen screen
   (dead device) looks the same as a live one. Options for M3: a heartbeat mark that flips
-  on every refresh, or an RTC on the PCB.
+  on every refresh, or an RTC on the PCB. An RTC would also let cell-age tracking work
+  on a device that never sees a network.
 - **5 V margin.** Does the XIAO's 5V pin stay at or above 5 V under load, and does the
   ZE15 care if it doesn't? (M1 measurement.)
 - **Socket fit.** Do the ZE15's short 2.0 mm pins seat reliably in Adafruit's sockets?

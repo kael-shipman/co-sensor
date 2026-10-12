@@ -40,7 +40,9 @@ For per-frame detail, temporarily set `logger: level: VERBOSE` in `common/base.y
    device. Assign an area and add the `co_sensor` label.
 2. Confirm that a reboot (the Restart button) and an OTA update (`make run` without
    `PORT`) both work.
-3. Optional: unplug the router (or block the device) for 20+ minutes. Uptime should keep
+3. Check that **CO sensor installed** shows today's date (recorded on the first clock
+   sync) and **CO sensor age** shows 0 d.
+4. Optional: unplug the router (or block the device) for 20+ minutes. Uptime should keep
    counting when it comes back, which shows it didn't reboot while offline.
 
 ## 5. Record for M2

@@ -1,7 +1,8 @@
 # Waveshare 1.54" e-Paper Module V2 (200x200, black/white, SSD1681).
 # Requires substitutions: pin_spi_clk, pin_spi_mosi, pin_epd_cs, pin_epd_dc,
-# pin_epd_reset, pin_epd_busy. Reads `co_ppm` and `co_fault` from modules/ze15.yaml
-# and `sntp_time` from common/base.yaml.
+# pin_epd_reset, pin_epd_busy. Reads `co_ppm` and `co_fault` from modules/ze15.yaml,
+# `co_cell_replacement_due` from modules/co-lifecycle.yaml and `sntp_time` from
+# common/base.yaml.
 #
 # E-ink keeps its last image when the device dies, so the screen always shows when
 # it was last refreshed; a stale timestamp is how you spot a dead device.
@@ -36,7 +37,12 @@ display:
     full_update_every: 20
     lambda: |-
       const int cx = it.get_width() / 2;
-      it.print(cx, 6, id(font_small), TextAlign::TOP_CENTER, "CARBON MONOXIDE");
+      if (id(co_cell_replacement_due).state) {
+        it.filled_rectangle(0, 0, it.get_width(), 30);
+        it.print(cx, 6, id(font_small), COLOR_OFF, TextAlign::TOP_CENTER, "REPLACE CO SENSOR");
+      } else {
+        it.print(cx, 6, id(font_small), TextAlign::TOP_CENTER, "CARBON MONOXIDE");
+      }
 
       const float ppm = id(co_ppm).state;
       if (id(co_fault).state) {
