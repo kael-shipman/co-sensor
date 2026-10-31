@@ -1,11 +1,24 @@
-# Waveshare 1.54" e-Paper Module V2 (200x200, black/white, SSD1681).
+# Seeed 1.54" monochrome ePaper (200x200, SSD1681) on Seeed's ePaper Driver Board for
+# XIAO; driven as ESPHome's waveshare_epaper `1.54inv2`, which is compatible.
 # Requires substitutions: pin_spi_clk, pin_spi_mosi, pin_epd_cs, pin_epd_dc,
 # pin_epd_reset, pin_epd_busy. Reads `co_ppm` and `co_fault` from modules/ze15.yaml,
 # `co_cell_replacement_due` from modules/co-lifecycle.yaml and `sntp_time` from
 # common/base.yaml.
 #
 # E-ink keeps its last image when the device dies, so the screen always shows when
-# it was last refreshed; a stale timestamp is how you spot a dead device.
+# it was last refreshed; a stale timestamp is how you spot a dead device. It refreshes
+# whenever a new reading is published (once per Update interval).
+
+esphome:
+  # Relative to the top-level config, like components_dir.
+  includes:
+    - ${components_dir}/../include/tz_label.h
+
+sensor:
+  - id: !extend co_ppm
+    on_value:
+      - component.update: epd
+
 spi:
   - id: epd_spi
     clk_pin: ${pin_spi_clk}
@@ -32,9 +45,10 @@ display:
     dc_pin: ${pin_epd_dc}
     reset_pin: ${pin_epd_reset}
     busy_pin: ${pin_epd_busy}
-    update_interval: 30s
-    # Partial refreshes in between; a full refresh clears ghosting.
-    full_update_every: 20
+    update_interval: never  # driven by new readings, see above
+    # Partial refreshes in between; a full refresh (a visible black/white flash) clears
+    # ghosting. 120 refreshes is every 30 minutes at the default 15 s interval.
+    full_update_every: 120
     lambda: |-
       const int cx = it.get_width() / 2;
       if (id(co_cell_replacement_due).state) {
@@ -56,7 +70,14 @@ display:
 
       auto now = id(sntp_time).now();
       if (now.is_valid()) {
-        it.strftime(cx, it.get_height() - 4, id(font_small), TextAlign::BOTTOM_CENTER, "updated %H:%M", now);
+        // e.g. "Oct 26 at 21:30:15 CDT"
+        const auto &tz = esphome::time::get_global_tz();
+        const bool month_rule = tz.dst_start.type == esphome::time::DSTRuleType::MONTH_WEEK_DAY;
+        char zone[16];
+        co_sensor::tz_label(tz.std_offset_seconds, tz.dst_offset_seconds, tz.has_dst(),
+                            month_rule ? tz.dst_start.month : 0, now.is_dst, zone, sizeof(zone));
+        it.printf(cx, it.get_height() - 4, id(font_small), TextAlign::BOTTOM_CENTER, "%s %d at %02d:%02d:%02d %s",
+                  now.strftime("%b").c_str(), now.day_of_month, now.hour, now.minute, now.second, zone);
       } else {
         it.print(cx, it.get_height() - 4, id(font_small), TextAlign::BOTTOM_CENTER, "no clock");
       }

@@ -1,11 +1,19 @@
 # Optional: exposes the device's entities to Home Assistant via the ESPHome native API.
 # The device works the same without this package; it only adds a consumer.
 api:
-  encryption:
-    key: !secret api_encryption_key
+  # Encrypted, but no key in the image: the unit boots unprovisioned and Home Assistant
+  # sets a unique key when it adopts it (needs HA 2026.x's ESPHome integration).
+  encryption: {}
   # ESPHome reboots after 15 min without an API client by default; the sensor's job
   # doesn't depend on Home Assistant being up.
   reboot_timeout: 0s
+
+# Home Assistant (2026.3+) sends its timezone with the time, and the device applies it
+# globally, so the display follows HA's timezone setting with nothing to configure.
+# Leave `timezone:` unset here, or HA's won't be applied.
+time:
+  - platform: homeassistant
+    id: ha_time
 
 sensor:
   - platform: wifi_signal

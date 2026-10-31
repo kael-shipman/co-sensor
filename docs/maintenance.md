@@ -29,7 +29,7 @@ where it survives reboots, firmware updates, and Home Assistant being down or re
 
 | Entity | Kind | Meaning |
 |---|---|---|
-| CO sensor installed | date, editable | Recorded automatically on the first clock sync after flashing. Edit it to backdate a sensor installed earlier. |
+| CO sensor installed | date, editable | Recorded automatically once the clock has synced and the sensor is reporting, so units flashed before their sensor arrives don't start counting early. Edit it to backdate a sensor installed earlier. |
 | CO sensor replaced | button | Sets the install date to today. Press it after swapping the module. |
 | CO sensor service life | number, editable | Years before replacement is due. Default 3, the low end of Winsen's 3–5 year rating. |
 | CO sensor age | sensor | Days since installation; unknown until the clock has synced. |
@@ -44,7 +44,7 @@ How it works and where it falls short:
   to press the button.
 - **Erasing flash resets it.** Normal and OTA flashing keep the stored values, but a full
   USB flash erase does not, and neither does renaming these entities: their names key the
-  storage. After either, the first clock sync records that day as the install date, so
+  storage. After either, the date is re-recorded the next time the sensor reports, so
   backdate it by hand.
 
 ## Replacing the sensor

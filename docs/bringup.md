@@ -1,28 +1,35 @@
 # M1 bring-up
 
-Goal: CO readings from the ZE15 are verified end to end, and everything M2 depends on
-has been measured. The display doesn't exist yet in M1, so readings are checked in the logs
-and in Home Assistant.
+Goal: CO readings from the ZE15 verified end to end, and everything the sensor board and
+enclosure depend on measured.
 
-## 1. Flash the bare XIAO (before wiring anything)
+## 1. Flash and onboard (before the sensor is connected)
 
-1. `cp firmware/secrets.example.yaml firmware/secrets.yaml` and fill it in. Generate the
-   API key with `openssl rand -base64 32`.
-2. Plug the XIAO in over USB-C, then run `make run PORT=/dev/ttyACM0`.
-   - If the port doesn't appear or flashing fails, hold **BOOT** while plugging in.
-3. With no sensor attached, expect the logs to show, after 10 s:
-   `No valid frame for 10000 ms; check wiring and power`. This shows the timeout path
-   works; the fault entity should be on.
+1. Assemble: XIAO into the ePaper Driver Board's socket (USB-C at the board edge), and
+   the panel's ribbon into the driver board's FPC connector.
+2. Plug the XIAO in over USB-C (a data cable), then run `make run PORT=/dev/ttyACM0`.
+   - If the port doesn't appear or flashing fails, hold the XIAO's **B** button while
+     plugging in.
+   - No secrets file is needed: the firmware contains no credentials.
+3. Onboard it: join its `co-sensor-xxxxxx` hotspot, pick your Wi-Fi network, and adopt
+   it in Home Assistant within 15 minutes of boot. See [onboarding](onboarding.md).
+4. With no sensor attached, expect:
+   - the screen shows **WARMING UP**, then **SENSOR FAULT**;
+   - after 10 s the log shows `No valid frame for 10000 ms; check wiring and power`;
+   - the fault entity is on.
+
+   That proves the timeout path.
 
 ## 2. Wire the sensor
 
-Follow [wiring → M1](wiring.md#m1-wiring-no-soldering). Unplug USB first, and check that
-Vin and GND aren't swapped.
+Follow [wiring → M1](wiring.md#m1-wiring): one header soldered onto the driver board, then
+two jumper pairs to the ZE15. Unplug USB first, and check that Vin and GND aren't
+swapped. Stand the ZE15 can up, away from drafts and the XIAO's warmth.
 
 ## 3. First readings
 
 Run `make logs`. The `No valid frame` warning from step 1 should no longer appear. The CO
-value stays unknown until the 60 s warm-up ends, then updates every 5 s.
+value stays unknown until the 60 s warm-up ends, then updates once per Update interval (15 s by default).
 
 | Check | Expected |
 |---|---|
@@ -36,16 +43,16 @@ For per-frame detail, temporarily set `logger: level: VERBOSE` in `common/base.y
 
 ## 4. Home Assistant
 
-1. Follow [integrations/home-assistant.md](integrations/home-assistant.md) to adopt the
-   device. Assign an area and add the `co_sensor` label.
+1. If you haven't already, adopt the device (see [onboarding](onboarding.md)). Assign an
+   area and add the `co_sensor` label.
 2. Confirm that a reboot (the Restart button) and an OTA update (`make run` without
    `PORT`) both work.
-3. Check that **CO sensor installed** shows today's date (recorded on the first clock
-   sync) and **CO sensor age** shows 0 d.
+3. Check that **CO sensor installed** shows today's date (recorded once the sensor
+   reports and the clock has synced) and **CO sensor age** shows 0 d.
 4. Optional: unplug the router (or block the device) for 20+ minutes. Uptime should keep
    counting when it comes back, which shows it didn't reboot while offline.
 
-## 5. Record for M2
+## 5. Record for the sensor board and enclosure
 
 Fill these in; the PCB design depends on them.
 

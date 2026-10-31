@@ -1,0 +1,11 @@
+# An owner's adopted config: the product image plus an OTA password, as documented in
+# docs/onboarding.md. Guards the `ota_esphome` id that adoption extends.
+substitutions:
+  components_dir: ../../firmware/components
+
+packages:
+  device: !include ../../firmware/co-sensor.yaml
+
+ota:
+  - id: !extend ota_esphome
+    password: "test-only-password"

@@ -3,6 +3,11 @@
 #
 # Publishes `co_ppm` and `co_fault`; other modules (e.g. the display) consume
 # those ids and never talk to the sensor directly.
+#
+# The module reports every second. Those readings are averaged and `co_ppm` is
+# published once per *Update interval* (default 15 s, adjustable from Home Assistant),
+# so integrations and the display update together at a sensible rate. `co_fault` is
+# published immediately.
 external_components:
   - source:
       type: local
@@ -19,16 +24,84 @@ ze15_co:
   uart_id: ze15_uart
 
 sensor:
+  # Raw 1 Hz readings, accumulated into the current reporting window
   - platform: ze15_co
     ze15_co_id: ze15
     carbon_monoxide:
-      id: co_ppm
-      name: Carbon monoxide
-      filters:
-        # The module reports every second; average to smooth noise and keep
-        # downstream consumers (display, integrations) from churning.
-        # NaN (fault/timeout) passes straight through.
-        - throttle_average: 5s
+      id: co_ppm_raw
+      internal: true
+      on_value:
+        - lambda: |-
+            if (std::isnan(x)) {
+              id(co_window_fault) = true;
+            } else {
+              id(co_window_sum) += x;
+              id(co_window_count)++;
+            }
+
+  # The published reading: the window's average, or unknown if the window saw a fault
+  # or timeout, or had no readings (warm-up, disconnected sensor)
+  - platform: template
+    id: co_ppm
+    name: Carbon monoxide
+    unit_of_measurement: ppm
+    device_class: carbon_monoxide
+    state_class: measurement
+    accuracy_decimals: 1
+    update_interval: never
+    lambda: |-
+      const bool unknown = id(co_window_fault) || id(co_window_count) == 0;
+      const float avg = unknown ? NAN : id(co_window_sum) / id(co_window_count);
+      id(co_window_sum) = 0;
+      id(co_window_count) = 0;
+      id(co_window_fault) = false;
+      return avg;
+
+globals:
+  - id: co_window_sum
+    type: float
+    initial_value: "0"
+  - id: co_window_count
+    type: uint32_t
+    initial_value: "0"
+  - id: co_window_fault
+    type: bool
+    initial_value: "false"
+
+number:
+  - platform: template
+    id: update_interval
+    name: Update interval
+    entity_category: config
+    device_class: duration
+    unit_of_measurement: s
+    min_value: 5
+    max_value: 600
+    step: 5
+    initial_value: 15
+    optimistic: true
+    restore_value: true
+    mode: box
+    on_value:
+      - script.execute: reporting_cycle  # restart, so a new interval applies at once
+
+script:
+  # One tick per update interval publishes `co_ppm`; consumers react to that.
+  - id: reporting_cycle
+    mode: restart
+    then:
+      - while:
+          condition:
+            lambda: "return true;"
+          then:
+            - delay: !lambda "return static_cast<uint32_t>(id(update_interval).state * 1000);"
+            - component.update: co_ppm
+
+esphome:
+  on_boot:
+    - priority: -100
+      then:
+        - script.execute: reporting_cycle
 
 binary_sensor:
   - platform: ze15_co

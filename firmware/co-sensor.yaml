@@ -11,9 +11,9 @@ packages:
   board: !include boards/xiao-esp32c6.yaml
   co: !include modules/ze15.yaml
   co_lifecycle: !include modules/co-lifecycle.yaml
-  # M3: enable once the display is connected (the driver waits on BUSY, so don't
-  # enable it without the panel attached).
-  # display: !include modules/epd-1in54.yaml
+  # Every unit has an ePaper Driver Board + panel. Without a panel attached the driver
+  # times out waiting on BUSY at each refresh (harmless, but logs warnings).
+  display: !include modules/epd-1in54.yaml
 
   # Optional consumers of the sensor's readings. Remove for a standalone device.
   home_assistant: !include integrations/home-assistant.yaml

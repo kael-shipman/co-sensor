@@ -39,8 +39,9 @@ output:
     pin: GPIO14
 
 esphome:
+  # A list item, so packages' on_boot automations stay separate (dicts would merge).
   on_boot:
-    priority: 800
-    then:
-      - output.turn_off: rf_switch_power
-      - output.turn_off: rf_antenna_select
+    - priority: 800
+      then:
+        - output.turn_off: rf_switch_power
+        - output.turn_off: rf_antenna_select

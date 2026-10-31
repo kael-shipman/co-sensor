@@ -1,6 +1,6 @@
 # Tracks the age of the CO cell so it gets replaced on schedule. Electrochemical cells
 # lose sensitivity whether or not they're powered (see docs/maintenance.md).
-# Requires `sntp_time` from common/base.yaml. Publishes `co_cell_age` (days) and
+# Requires `sntp_time` from common/base.yaml and `co_fault` from modules/ze15.yaml. Publishes `co_cell_age` (days) and
 # `co_cell_replacement_due`.
 #
 # The state lives on the device (flash), not in any integration, so it survives
@@ -80,12 +80,15 @@ button:
       - script.execute: record_co_cell_installed_today
 
 interval:
-  # Records the install date on the first clock sync after flashing.
+  # Records the install date once the clock has synced AND the sensor is actually
+  # reporting, so flashing a unit before its sensor arrives doesn't start the clock.
   - interval: 1min
     then:
       - if:
           condition:
-            lambda: "return id(co_cell_installed).year < 2019 && id(sntp_time).now().is_valid();"
+            lambda: |-
+              return id(co_cell_installed).year < 2019 && id(sntp_time).now().is_valid() &&
+                     id(co_fault).has_state() && !id(co_fault).state;
           then:
             - script.execute: record_co_cell_installed_today
 
