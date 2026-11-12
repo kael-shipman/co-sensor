@@ -11,8 +11,8 @@ Last updated 2026-11-12. Read this first, then [README.md](README.md),
 Notes:
 
 - The first enclosure design is done in OpenSCAD (`enclosure/`) and fit-checked
-  (`make enclosure-check`), with STLs and renders committed (2026-11-12, branch
-  `sensor-enclosure-plan`). Nothing printed yet. Next: Kael reviews the renders (M4 task 1).
+  (`make enclosure-check`), with STLs and renders committed and merged to `main`
+  (2026-11-12). Nothing printed yet. Next: Kael reviews the renders (M4 task 1).
 - Changed direction on M2: no custom PCB. A Sullins NPPN101FGGN-RC right-angle socket on
   the ZE15's 10-pin row, three wires to the driver board's 5V, GND and D7 (ZE15 pins 15,
   14 and 8). The carrier PCB and its CadQuery tooling were removed.
@@ -65,12 +65,11 @@ Outstanding Questions:
   flashed over USB with the **no-credentials** firmware. Onboarded through the unit's
   hotspot, then adopted in HA (2026.10.2), which provisioned the API key automatically.
   The display showed SENSOR FAULT, which is correct without a sensor. It worked first try.
-- **Repo:** private, `github.com/kael-shipman/co-sensor`. `main` has the firmware; the
-  enclosure, licensing and plan restructure are on `sensor-enclosure-plan` (pushed
-  2026-11-12, not merged). Commit and push
-  only when Kael asks. The first commit's message was `:sunrise:` (Kael's choice). End
-  commit messages with the `Co-Authored-By` trailer from the session's attribution
-  instructions.
+- **Repo:** private, `github.com/kael-shipman/co-sensor`, branch `main`. Everything,
+  including the enclosure, licensing and plan restructure, is merged there (2026-11-12).
+  Commit and push only when Kael asks. The first commit's message was `:sunrise:` (Kael's
+  choice). End commit messages with the `Co-Authored-By` trailer from the session's
+  attribution instructions.
 
 ## Kael's preferences (apply throughout)
 
