@@ -2,15 +2,12 @@
 
 - [`measurements.md`](measurements.md): dimensions measured on the first real unit, with
   [`photos/`](photos/). Start here; it overrides estimates elsewhere.
-- [`carrier/`](carrier/README.md): carrier v0.2, **shelved**. It plugged into the driver
-  board from below, but the panel's very short ribbon means the panel must fold flat
-  against the driver board's underside, so nothing can mount there. Its KiCad generator,
-  footprint check and ZE15 footprint remain useful starting points.
-- **Next board (proposed, not designed):** a small sensor board holding the ZE15 in 2.0 mm
-  sockets, with a 3-pin connector (5V, GND, D7) on a short cable to a header on the
-  driver board. See [docs/plan.md](../docs/plan.md).
+- **No custom PCB.** The ZE15 connects to the driver board through a right-angle socket on
+  its own pins and three wires (see [enclosure](../enclosure/README.md#the-sensor-plug)).
+  Two earlier PCB designs, a carrier under the driver board and a small sensor board, were
+  dropped; the carrier's KiCad generator is in the git history.
 
-Constraints any board should keep:
+Constraints any future board should keep:
 
 - **Pin map:** [docs/wiring.md](../docs/wiring.md). The firmware and Seeed's driver board
   both depend on it.
@@ -23,4 +20,4 @@ Constraints any board should keep:
   put together (Kael's requirement).
 
 Ideas for later: a Qwiic (I2C on D4/D5) port for a temperature/humidity sensor, and an
-RTC for offline timekeeping (see [docs/plan.md](../docs/plan.md)).
+RTC for offline timekeeping (see [RESUME.md](../RESUME.md)).

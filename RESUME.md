@@ -1,56 +1,61 @@
-# RESUME: handoff for the next session
+RESUME
+============================================================================
 
-Last updated 2026-10-31. Read this first, then `README.md`, `docs/plan.md` and
-`enclosure/README.md`.
+**Current Milestone: [M4](<./docs/plan/milestones/m04 - enclosure.md>)** (M1's sensor
+bring-up can run in parallel: [M1](<./docs/plan/milestones/m01 - first readings.md>))
 
-## Next task: design the enclosure (M4)
+Last updated 2026-11-12. Read this first, then [README.md](README.md),
+[VISION.md](VISION.md), [docs/plan/](docs/plan/README.md) and
+[enclosure/README.md](enclosure/README.md). Each milestone file has its own task list.
 
-1. **Get Kael's answers** to the open questions in [`enclosure/README.md`](enclosure/README.md#still-needed-from-kael):
-   - the architecture (sensor board on a cable vs harness + cradle);
-   - mounting and orientation, battery bay, assembly style, printing method, and XIAO pin
-     trimming;
-   - measurements.
-2. **Check the footprint test.** The ZE15 footprint check was printed on 2026-10-31
-   (CUPS job 22). Ask whether the scale bar measured 50 mm, whether every ZE15 pin landed
-   on a hole, and whether the square pads (pins 1 and 6) matched.
-   - If not: the datasheet figure may be a bottom view, not the top view assumed in
-     `hardware/carrier/geometry.py`. A mirror image calls for a re-route, not a tweak.
-3. **Update `enclosure/assembly.py`** to the real arrangement, using
-   [`hardware/measurements.md`](hardware/measurements.md):
-   - the panel folded flat behind the driver board (1–4 mm gap, face out);
-   - the XIAO stack (~22 mm, or ~18.5 mm with trimmed pins);
-   - the sensor board on a cable.
-   It still models the shelved carrier v0.2.
-4. **If the sensor board is approved,** design it by adapting
-   `hardware/carrier/generate.py`: the ZE15 2.0 mm sockets, a 3-pin connector (5V, GND,
-   D7), and mounting holes. Keep the printable footprint check.
-5. **Design the enclosure** in CadQuery (STEP/STL for print services). Follow the
-   requirements in `enclosure/README.md`. Kael's emphasis: **compact but tidy,
-   professional and practical to assemble by hand.**
+Notes:
 
-## Also outstanding
-
-- **M1 sensor bring-up.** The ZE15s have arrived but aren't connected yet. Follow
-  `docs/bringup.md` and `docs/wiring.md#m1-wiring`: one 1×7 header soldered **pins up**
-  on the driver board's 5V…D7 column, then two Adafruit 2.0↔2.54 mm jumper pairs. Record
-  the 5 V rail under load.
-- **Firmware built but not yet verified on hardware** (flash with `make run`, OTA):
-  - the HA-editable *Update interval* (default 15 s; the display refreshes on each publish);
-  - the timestamp line "Oct 26 at 21:30:15 CDT": check it fits the 200 px width;
-  - the timezone from Home Assistant (units showed UTC before this change).
-- **Home Assistant alerting isn't built.** Offered, not done:
-  - one Threshold helper per unit (suggested 9 ppm elevated, 35 ppm high);
-  - one alerting automation and one replacement-reminder automation, both driven by the
-    `co_sensor` **label**, not per device.
-  Load the `home-assistant-best-practices` skill first; the HA MCP server is available.
-- **Battery backup is unverified.** The driver board's LiPo connector and charger/boost
-  might keep the 5 V rail (and the ZE15) alive through power cuts. Test before claiming it.
-- **Standalone timezone.** Units without HA show UTC; `web_server` could add a setting.
-  Not requested.
+- The first enclosure design is done in OpenSCAD (`enclosure/`) and fit-checked
+  (`make enclosure-check`), with STLs and renders committed (2026-11-12, branch
+  `sensor-enclosure-plan`). Nothing printed yet. Next: Kael reviews the renders (M4 task 1).
+- Changed direction on M2: no custom PCB. A Sullins NPPN101FGGN-RC right-angle socket on
+  the ZE15's 10-pin row, three wires to the driver board's 5V, GND and D7 (ZE15 pins 15,
+  14 and 8). The carrier PCB and its CadQuery tooling were removed.
+- Shopping for the plug and enclosure hardware is in [docs/bom.md](docs/bom.md#order-3-the-sensor-plug-and-the-enclosures-hardware);
+  not ordered yet. Wire colours (2026-11-05): red 5V, black GND, yellow TXD; 26 AWG PVC
+  from Remington, 1/16" non-adhesive heat-shrink from DigiKey. Confirm Remington part numbers
+  and the heat-shrink price at checkout (not verified online).
+- Repo restructured to the execute-project layout on 2026-11-05: `docs/plan.md` split into
+  `VISION.md` (architecture, decisions) and `docs/plan/` (milestones); open questions
+  moved here.
+- **Home Assistant alerting isn't built.** Offered, not done: one Threshold helper per
+  unit (suggested 9 ppm elevated, 35 ppm high); one alerting automation and one
+  replacement-reminder automation, both driven by the `co_sensor` **label**, not per
+  device. Load the `home-assistant-best-practices` skill first; the HA MCP server is
+  available.
 - **When the repo goes public:** add `dashboard_import` (needs a git source for the
   external components), and consider ESP Web Tools for browser flashing.
 
-## Current state (2026-10-31)
+Outstanding Questions:
+
+1. **5 V margin.** Does the XIAO's 5V pin stay at or above 5 V under load, and does the
+   ZE15 care if it doesn't? (M1 measurement.)
+2. **Enclosure estimates.** A few dimensions in `enclosure/config.scad` are still from
+   photos rather than calipers; see [enclosure](enclosure/README.md#still-estimated).
+   (Settled: the ZE15 drawing is a top view and its pins are standard 2.0 mm; the XIAO's
+   pins stay untrimmed, since the sensor, not the display, sets the depth.)
+3. **Offline liveness on the display.** Without Wi-Fi there's no clock, so a frozen screen
+   (dead device) looks the same as a live one. Options: a heartbeat mark that flips on
+   every refresh, or an RTC. An RTC would also let cell-age tracking work on a device that
+   never sees a network.
+4. **Battery backup (worth investigating).** The driver board has a battery connector and
+   a charger/boost chip on the same 5 V rail that feeds the ZE15, so a LiPo might keep a
+   unit measuring through power cuts. Unverified; test before claiming it.
+5. **Timezone without Home Assistant.** Standalone units show UTC. ESPHome's `web_server`
+   could expose a timezone setting, at some flash cost and with an open settings page.
+   Not requested.
+6. **ESPHome display driver.** The display module uses `waveshare_epaper` (`1.54inv2`).
+   ESPHome's newer `epaper_spi` driver supports this panel on its dev branch but not yet
+   in 2026.9; migrate once it ships in stable.
+7. **Q&A mode.** Untested on hardware. The manual's Q&A example checksum (0x7A)
+   contradicts its own formula (0x70); the parser trusts the formula.
+
+## Current state (2026-11-12)
 
 - **Hardware on hand:** 4 XIAO ESP32-C6 (pre-soldered), 3 Seeed ePaper Driver Boards V2,
   4 Seeed 1.54" panels, ZE15-COs (from AliExpress), and the Adafruit parts (1919 jumpers,
@@ -60,7 +65,9 @@ Last updated 2026-10-31. Read this first, then `README.md`, `docs/plan.md` and
   flashed over USB with the **no-credentials** firmware. Onboarded through the unit's
   hotspot, then adopted in HA (2026.10.2), which provisioned the API key automatically.
   The display showed SENSOR FAULT, which is correct without a sensor. It worked first try.
-- **Repo:** private, `github.com/kael-shipman/co-sensor`, branch `main`. Commit and push
+- **Repo:** private, `github.com/kael-shipman/co-sensor`. `main` has the firmware; the
+  enclosure, licensing and plan restructure are on `sensor-enclosure-plan` (pushed
+  2026-11-12, not merged). Commit and push
   only when Kael asks. The first commit's message was `:sunrise:` (Kael's choice). End
   commit messages with the `Co-Authored-By` trailer from the session's attribution
   instructions.
@@ -82,11 +89,11 @@ Last updated 2026-10-31. Read this first, then `README.md`, `docs/plan.md` and
 
 ## Hard-won technical facts (not obvious from the code)
 
-- **Toolchain:** everything runs in Docker via `make`.
+- **Toolchain:** the firmware runs in Docker via `make`.
   - ESPHome is `ghcr.io/esphome/esphome:stable`, 2026.9.1 when built. Caches live in
     `~/.cache/co-sensor`.
-  - KiCad 9 is `kicad/kicad:9.0`.
-  - CadQuery 2.8.0 comes from a local image built from `tools/cad.Dockerfile`.
+  - The enclosure uses a locally installed OpenSCAD (2021.01 on Kael's machine) plus
+    `xvfb-run` for headless renders. `make enclosure-check` takes ~4 minutes on 20 cores.
   - The Makefile adds the `dialout` group to the container, so Kael doesn't need to be in it.
 - **ESPHome package merging:** two packages' `esphome: on_boot:` written as **dicts merge
   into one automation** (the board's priority-800 antenna setup got demoted). Always write
@@ -128,12 +135,16 @@ Last updated 2026-10-31. Read this first, then `README.md`, `docs/plan.md` and
   - The ME2-CO cell **ages on the shelf**, so spares are for accidents, not end-of-life
     replacement (`docs/maintenance.md`).
   - Winsen says it is **not for life-safety use**; keep a certified CO alarm.
-- **The KiCad generator** places items with random UUIDs and ordering. To check that a
-  refactor didn't change the board, compare `.kicad_pcb` files order-insensitively with
-  UUIDs stripped.
-- **Printing the 1:1 footprint check:** CUPS default printer `HP-OfficeJet-Pro-8030-series`.
-  Run `lp -d HP-OfficeJet-Pro-8030-series -o media=Letter -o print-scaling=none build/carrier-footprint-check.pdf`
-  (the PDF is A4 landscape; unscaled, it fits Letter). Always check the 50 mm scale bar.
+- **ZE15 orientation:** Winsen's drawing is a **top view** (confirmed by a printed 1:1
+  footprint check, 2026-10-31), and its pins fit standard 2.0 mm sockets. With the 10-pin
+  row along the bottom and the can facing front, pin 15 is at the right-hand end.
+- **Printing 1:1 on paper:** CUPS default printer `HP-OfficeJet-Pro-8030-series`; use
+  `-o print-scaling=none` and always include a 50 mm scale bar. Its scanner works for
+  measuring boards: 300 dpi, deskew, and calibrate against the 2.54 mm header pitch.
+- **Enclosure fit checks** (`enclosure/check.py`) intersect each part with the others and
+  with models of the hardware; touching faces give zero-thickness results, which it
+  ignores. The spring fingers squeeze the can on purpose, so that check uses a slightly
+  smaller can.
 
 ## Resume commands
 
@@ -142,6 +153,5 @@ cd ~/Repos/co-sensor
 make test                 # host unit tests + esphome config on all firmware configs
 make compile              # full firmware builds
 make run                  # OTA-flash a unit (asks which, if several); PORT=/dev/ttyACM0 for USB
-make carrier-check        # printable footprint check (ZE15 outline)
-make assembly             # CadQuery model + renders (needs updating, see above)
+make enclosure            # STLs, fit checks and renders (needs OpenSCAD + xvfb-run)
 ```

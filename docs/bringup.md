@@ -1,7 +1,7 @@
 # M1 bring-up
 
-Goal: CO readings from the ZE15 verified end to end, and everything the sensor board and
-enclosure depend on measured.
+Goal: CO readings from the ZE15 verified end to end, and everything the enclosure and
+power design depend on measured.
 
 ## 1. Flash and onboard (before the sensor is connected)
 
@@ -52,9 +52,11 @@ For per-frame detail, temporarily set `logger: level: VERBOSE` in `common/base.y
 4. Optional: unplug the router (or block the device) for 20+ minutes. Uptime should keep
    counting when it comes back, which shows it didn't reboot while offline.
 
-## 5. Record for the sensor board and enclosure
+## 5. Record for the enclosure and power design
 
-Fill these in; the PCB design depends on them.
+Fill these in. The ZE15's outline, can and pin pitch were since measured with calipers and
+a 1:1 footprint print ([measurements](../hardware/measurements.md)); the rows below are
+still worth checking against a real module.
 
 | Measurement | Value |
 |---|---|
@@ -66,8 +68,9 @@ Fill these in; the PCB design depends on them.
 | Fit in Adafruit 2 mm sockets: seats firmly? removable without stress? | |
 | Frame interval observed | |
 
-If the 5 V rail measures under 5 V and readings misbehave, the PCB should take USB power
-directly instead of through the XIAO's 5V pin.
+If the 5 V rail measures under 5 V and readings misbehave, the ZE15 needs USB power
+directly instead of through the XIAO's 5V pin, which changes the sensor plug's wiring
+(see the Power decision in [VISION.md](../VISION.md#decisions)).
 
 ## Done when
 

@@ -31,19 +31,14 @@ ESPHOME_DEVICE = docker run --rm -it --network host \
 	-v "$(CACHE_DIR)/build":/build \
 	$(ESPHOME_IMAGE)
 
-# Hardware: KiCad in Docker, like ESPHome.
-KICAD_IMAGE ?= kicad/kicad:9.0
-CARRIER_DIR := hardware/carrier
-CARRIER_PCB := $(CARRIER_DIR)/co-sensor-carrier.kicad_pcb
-KICAD = docker run --rm --user $(shell id -u):$(shell id -g) -e HOME=/tmp \
-	-v "$(CURDIR)":/work -w /work/$(CARRIER_DIR) $(KICAD_IMAGE)
+# Enclosure: OpenSCAD, installed locally (e.g. `apt install openscad`). The STLs and
+# renders are committed, so building a unit doesn't need it.
+OPENSCAD ?= openscad
+ENCLOSURE_PARTS := body display-face sensor-face
+ENCLOSURE_SRC := enclosure/config.scad enclosure/parts.scad enclosure/components.scad
+RENDER = $(if $(DISPLAY),,xvfb-run -a) $(OPENSCAD) --imgsize=1100,1300 --colorscheme=Tomorrow --projection=p
 
-# Mechanical models: CadQuery in a small local image (tools/cad.Dockerfile).
-CAD_IMAGE ?= co-sensor-cad
-CAD = docker run --rm --user $(shell id -u):$(shell id -g) -e HOME=/tmp \
-	-v "$(CURDIR)":/work -w /work $(CAD_IMAGE)
-
-.PHONY: test test-unit validate compile run logs clean carrier carrier-check carrier-fab cad-image assembly
+.PHONY: test test-unit validate compile run logs clean enclosure enclosure-check enclosure-renders
 
 ## test: unit tests + firmware config validation (fast)
 test: test-unit validate
@@ -86,36 +81,24 @@ run: | $(CACHE_DIR)
 logs:
 	$(ESPHOME_DEVICE) logs firmware/$(DEVICE).yaml $(if $(PORT),--device $(PORT))
 
-## carrier: regenerate the carrier PCB from its script and run KiCad's DRC (fails on any violation)
-carrier:
-	$(KICAD) python3 generate.py
-	$(KICAD) kicad-cli pcb drc --severity-all --exit-code-violations \
-		-o /tmp/drc.rpt co-sensor-carrier.kicad_pcb
+## enclosure: printable STLs -> enclosure/stl/, plus fit checks and renders
+enclosure: $(ENCLOSURE_PARTS:%=enclosure/stl/%.stl) enclosure-check enclosure-renders
 
-## carrier-check: printable 1:1 footprint check -> build/carrier-footprint-check.pdf
-carrier-check: carrier
-	@mkdir -p build
-	$(KICAD) kicad-cli pcb export pdf --mode-single --black-and-white \
-		-l F.Cu,F.Fab,Edge.Cuts,User.Drawings \
-		-o /work/build/carrier-footprint-check.pdf co-sensor-carrier.kicad_pcb
+enclosure/stl/%.stl: enclosure/%.scad $(ENCLOSURE_SRC)
+	@mkdir -p enclosure/stl
+	$(OPENSCAD) --export-format binstl -o $@ $<
 
-## carrier-fab: Gerbers + drill files for ordering -> build/co-sensor-carrier-fab.zip
-carrier-fab: carrier
-	@rm -rf build/carrier-fab && mkdir -p build/carrier-fab
-	$(KICAD) kicad-cli pcb export gerbers \
-		-l F.Cu,B.Cu,F.Mask,B.Mask,F.Silkscreen,B.Silkscreen,Edge.Cuts \
-		-o /work/build/carrier-fab/ co-sensor-carrier.kicad_pcb
-	$(KICAD) kicad-cli pcb export drill -o /work/build/carrier-fab/ co-sensor-carrier.kicad_pcb
-	cd build/carrier-fab && rm -f ../co-sensor-carrier-fab.zip && zip -q ../co-sensor-carrier-fab.zip *
-	@echo "Upload build/co-sensor-carrier-fab.zip to the PCB fab."
+## enclosure-check: fail if any printed part collides with another or with the hardware
+enclosure-check:
+	python3 enclosure/check.py $(OPENSCAD)
 
-cad-image:
-	docker build -q -t $(CAD_IMAGE) -f tools/cad.Dockerfile tools/ >/dev/null
-
-## assembly: 3D model of an assembled unit -> build/assembly.{step,glb} + build/assembly-*.png
-assembly: cad-image
-	@mkdir -p build
-	$(CAD) python enclosure/assembly.py
+## enclosure-renders: pictures of the assembled unit -> enclosure/renders/
+enclosure-renders: $(ENCLOSURE_SRC) enclosure/assembly.scad
+	@mkdir -p enclosure/renders
+	$(RENDER) -o enclosure/renders/front.png --camera=0,15,42,70,0,-35,250 enclosure/assembly.scad
+	$(RENDER) -o enclosure/renders/back.png --camera=0,15,42,70,0,150,250 enclosure/assembly.scad
+	$(RENDER) -o enclosure/renders/exploded.png --camera=0,0,42,70,0,-40,290 -D explode=22 enclosure/assembly.scad
+	$(RENDER) -o enclosure/renders/cutaway.png --camera=0,15,42,90,0,90,270 -D cutaway=true enclosure/assembly.scad
 
 $(CACHE_DIR):
 	mkdir -p $(CACHE_DIR)/cache $(CACHE_DIR)/build

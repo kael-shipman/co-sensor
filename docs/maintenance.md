@@ -50,8 +50,10 @@ How it works and where it falls short:
 ## Replacing the sensor
 
 1. Unplug USB power.
-2. Swap the ZE15 module: unclip the sockets once the PCB exists (M2), or move the two
-   jumper pairs before that. Mind Vin/GND (see [wiring](wiring.md)).
+2. Swap the ZE15 module. In the enclosure: take off the sensor face (two screws), pull
+   the plug off the ZE15's pins, and press the can out of the spring fingers from behind
+   ([enclosure](../enclosure/README.md)). On the M1 jumper wiring, move the two jumper
+   pairs. Mind Vin/GND (see [wiring](wiring.md)).
 3. Power up and press **CO sensor replaced**.
 4. Give the new cell 48 hours before trusting its readings, especially if it was
    stored for a while.

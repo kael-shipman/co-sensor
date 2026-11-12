@@ -45,6 +45,8 @@ display:
     dc_pin: ${pin_epd_dc}
     reset_pin: ${pin_epd_reset}
     busy_pin: ${pin_epd_busy}
+    # In the enclosure the panel folds behind the driver board, which turns it upside down.
+    rotation: 180°
     update_interval: never  # driven by new readings, see above
     # Partial refreshes in between; a full refresh (a visible black/white flash) clears
     # ghosting. 120 refreshes is every 30 minutes at the default 15 s interval.

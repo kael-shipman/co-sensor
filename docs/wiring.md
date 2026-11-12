@@ -87,6 +87,12 @@ side D0–D6 top to bottom, right side 5V, GND, 3V3, D10, D9, D8, D7 top to bott
 **Before powering up, check pair A twice.** Swapping Vin and GND can destroy the module.
 Colour-code or label the wires and keep them labelled.
 
+## In the enclosure
+
+The jumpers are for bring-up. In the enclosure, a right-angle socket on the ZE15's 10-pin
+row carries the same three connections (pins 15, 14 and 8 to the driver board's 5V, GND and D7)
+on red, black and yellow wires; see [enclosure: the sensor plug](../enclosure/README.md#the-sensor-plug).
+
 ## The display
 
 The panel's ribbon goes into the driver board's 24-pin FPC connector: lift the latch,

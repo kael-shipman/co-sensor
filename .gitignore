@@ -3,8 +3,5 @@
 
 __pycache__/
 
-# KiCad per-user UI state
-*.kicad_prl
-
 # Owners' adopted configs (see docs/onboarding.md)
 /firmware/local/

@@ -1,0 +1,20 @@
+# Licence of every file, per https://reuse.software. Where several annotations match a
+# path, the last one wins, so the catch-all comes first. Summary in LICENSE.
+version = 1
+SPDX-PackageName = "co-sensor"
+SPDX-PackageDownloadLocation = "https://github.com/kael-shipman/co-sensor"
+
+[[annotations]]
+path = "**"
+SPDX-FileCopyrightText = "2026 Kael Shipman"
+SPDX-License-Identifier = "CC-BY-SA-4.0"
+
+[[annotations]]
+path = ["enclosure/**", "hardware/**"]
+SPDX-FileCopyrightText = "2026 Kael Shipman"
+SPDX-License-Identifier = "CERN-OHL-S-2.0"
+
+[[annotations]]
+path = ["firmware/**", "tests/**", "Makefile", "**/.gitignore", ".gitignore"]
+SPDX-FileCopyrightText = "2026 Kael Shipman"
+SPDX-License-Identifier = "GPL-3.0-or-later"
