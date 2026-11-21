@@ -22,14 +22,11 @@ Decisions made with Kael on 2026-10-31:
 
 1. [ ] **Kael reviews the renders** (`enclosure/renders/`) and the design choices in
    `enclosure/README.md`.
-2. [ ] **Measure the estimates** in
-   [enclosure: still estimated](../../../enclosure/README.md#still-estimated), chiefly how
-   far the XIAO's own board and its USB-C port stick out past the driver board's bottom
-   edge (Kael said ~2 mm; a photo suggests 2.7 + 2.5 mm). Update `config.scad`, then
-   `make enclosure`.
+2. [x] **Measure the estimates.** USB-C overhang 2 mm (confirmed), sensor with plug
+   ~26 mm deep (inside depth now 28 mm); see [measurements](../../../hardware/measurements.md).
 3. [ ] **Order** the sensor plugs and the enclosure hardware ([BOM, order 3](../../bom.md)).
-4. [ ] **Print and test-fit** on Kael's Ender 3 (PLA). Expect to tune clearances: the panel
-   slot, the spring fingers' grip on the can, the face lips, and the pin holes.
+4. [ ] **Print and test-fit** on Kael's Prusa Core One+ (PLA). Expect to tune clearances:
+   the panel slot, the spring fingers' grip on the can, the face lips, and the pin holes.
 5. [ ] **Firmware:** `rotation: 180°` was added to the display for the folded panel; flash
    and check it on hardware.
 6. [ ] **Write the single build guide** (Kael's requirement: anyone can go from GitHub to a

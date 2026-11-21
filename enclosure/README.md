@@ -1,7 +1,7 @@
 # Enclosure
 
 A wall-mounted case in three printed parts, designed in OpenSCAD. Overall size:
-**36.6 W × 81 H × 30.3 D mm**, plus 2 mm feet on the back.
+**36.6 W × 77.9 H × 31.6 D mm**, plus 2 mm feet on the back.
 
 <img src="renders/front.png" alt="Assembled unit, front: display window below, sensor grille above" width="260"> <img src="renders/exploded.png" alt="Exploded: the body, with the display face and sensor face pulled forward" width="260"> <img src="renders/back.png" alt="Back: two keyholes and four feet" width="260">
 
@@ -50,7 +50,10 @@ wires to the driver board:
 | 14 | GND | second from the right | black | GND |
 | 8 | TXD | eighth from the right | yellow | D7 |
 
-The other seven legs are clipped off. Solder the wires before the plug goes anywhere near
+Cut each wire to about **70 mm**: the route from the plug's legs to the header is
+55–62 mm, plus a few millimetres to strip at each end. Longer wires fold into the space
+beside the driver board. The other seven legs are clipped off. To take the plug off,
+pull on its plastic body, not on the wires or legs. Solder the wires before the plug goes anywhere near
 the sensor (the cell is heat-sensitive), with 26 AWG PVC-insulated wire and 1/16" plain
 (non-adhesive) heat-shrink: no silicone near the sensor (see [BOM, order 3](../docs/bom.md#order-3-the-sensor-plug-and-the-enclosures-hardware)).
 
@@ -101,15 +104,3 @@ make enclosure-check    # fit checks only
 
 The STLs and renders are committed, so building a unit doesn't need OpenSCAD. Changing the
 design does: install OpenSCAD 2021.01 or newer, and `xvfb-run` for headless renders.
-
-## Still estimated
-
-These come from photos or datasheets, not calipers. Each one sits in `config.scad`.
-
-- **`xiao_overhang` (2.7 mm) and `usb_overhang` (5.2 mm):** how far the XIAO's own board
-  and the USB-C port's face stick out past the driver board's bottom edge. Together they set
-  the height and where the port meets the bottom surface. Kael measured "about 2 mm"; a
-  photo suggests that was the port past the XIAO's board.
-- **`ze15_pin_exposed` (3.4 mm):** how much of the ZE15's pins stands above their plastic
-  strip. It sets how far back the plug sits, and so the depth.
-- **`ze15_pcb_t` (1.6 mm):** the ZE15's board thickness.

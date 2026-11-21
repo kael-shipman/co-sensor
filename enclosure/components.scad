@@ -64,7 +64,7 @@ module xiao() {
             [board_z + socket_tail_z[0] - 1.27, board_z + socket_tail_z[1] + 1.27]);
     usb_len = 7.35;
     usb_z0 = board_z - usb_overhang;
-    color(PCB_BLACK) box([-17.8 / 2, 17.8 / 2], [usb_y[0] - 1.2, usb_y[0]], [board_z - xiao_overhang, board_z - xiao_overhang + 21]);
+    color(PCB_BLACK) box([-17.8 / 2, 17.8 / 2], [usb_y[0] - 1.2, usb_y[0]], [board_z, board_z + 21]);
     color(PLASTIC) for (s = [-1, 1])
         box([s * socket_tail_x - 1.27, s * socket_tail_x + 1.27], [board_back_y + 4.7, usb_y[0] - 1.2],
             [board_z + socket_tail_z[0] - 1.27, board_z + socket_tail_z[1] + 1.27]);

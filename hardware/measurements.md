@@ -25,12 +25,23 @@ end, **front** = the driver board's underside, where the panel folds to face out
 | Driver board mounting holes | 4 × Ø ~2.6 mm (Kael: 2.5–3 mm), centres 1.85 mm in from each side edge (21.2 mm apart): one pair 22.9 mm and one pair 40.0 mm above the USB (bottom) edge |
 | Breakout columns (5V…D7, RST…D6) | 1.2 mm in from each side edge (22.6 mm apart); first hole 2.7 mm above the bottom edge; 2.54 mm pitch |
 | XIAO socket solder tails on the front | two columns ~17.9 mm apart (≈3.5 mm in from each side edge), spanning ~2.7–18 mm above the bottom edge; they protrude 1 mm |
-| USB-C receptacle | overhangs the board's bottom edge by ~2 mm (Kael) |
+| USB-C receptacle | overhangs the board's bottom edge by 2 mm (Kael; confirmed 2026-11-20) |
 | Display ribbon | 11.9 mm wide, centred on the board |
 | Slide switch | protrudes ~0.7 mm past the right edge (seen from the front), ~29 mm above the bottom edge |
 | ZE15 depth | 24 mm from the front of the can to the tips of its pins (pins point back, away from the can) |
 | ZE15 pin rows, as mounted | the 10-pin row along the edge nearest the driver board, the 5-pin row along the top edge |
 | ZE15 footprint check | printed 1:1 and confirmed: scale bar exactly 50 mm, every pin on its hole, square pads on pins 1 and 6. Winsen's drawing is a top view. |
+
+## 2026-11-20, first fully assembled unit (Kael)
+
+Without calipers.
+
+| Item | Value |
+|---|---|
+| Sensor with its plug fitted | ~26 mm from the front of the can to the solder on the back of the plug: the deepest point |
+| Sensor wires | cut to ~115 mm on the first unit (a guess). About 70 mm is enough: see [enclosure: the sensor plug](../enclosure/README.md#the-sensor-plug) |
+| Sensor wires at the driver board | soldered straight into the 5V, GND and D7 breakout holes; their ends stick out the front no further than a soldered header's tails |
+| Sullins plug's legs | fragile: they bend easily, and the plug comes off whenever the sensor is replaced |
 
 ## Display module stack (driver board outward, XIAO side)
 
@@ -85,10 +96,10 @@ it so tight that it can't be put together by hand.
 
 ## Still to measure
 
-- How far the XIAO's board and its USB-C port stick out past the driver board's bottom
-  edge, the ZE15's exposed pin length and its board thickness: still estimates in
-  `enclosure/config.scad` (see [enclosure: still estimated](../enclosure/README.md#still-estimated)).
 - The 5 V rail under load, during M1 bring-up ([bring-up](../docs/bringup.md)).
+
+Nothing for the enclosure. The ZE15's board thickness and exposed pin length stay
+nominal: they only shape the model, not the printed parts.
 
 The sensor-board idea that used to be proposed here was dropped: the ZE15 connects through
 a right-angle socket and three wires ([enclosure: the sensor plug](../enclosure/README.md#the-sensor-plug)).

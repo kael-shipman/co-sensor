@@ -35,18 +35,14 @@ Outstanding Questions:
 
 1. **5 V margin.** Does the XIAO's 5V pin stay at or above 5 V under load, and does the
    ZE15 care if it doesn't? (M1 measurement.)
-2. **Enclosure estimates.** A few dimensions in `enclosure/config.scad` are still from
-   photos rather than calipers; see [enclosure](enclosure/README.md#still-estimated).
-   (Settled: the ZE15 drawing is a top view and its pins are standard 2.0 mm; the XIAO's
-   pins stay untrimmed, since the sensor, not the display, sets the depth.)
-3. **Offline liveness on the display.** Without Wi-Fi there's no clock, so a frozen screen
+2. **Offline liveness on the display.** Without Wi-Fi there's no clock, so a frozen screen
    (dead device) looks the same as a live one. Options: a heartbeat mark that flips on
    every refresh, or an RTC. An RTC would also let cell-age tracking work on a device that
    never sees a network.
-4. **Battery backup (worth investigating).** The driver board has a battery connector and
+3. **Battery backup (worth investigating).** The driver board has a battery connector and
    a charger/boost chip on the same 5 V rail that feeds the ZE15, so a LiPo might keep a
    unit measuring through power cuts. Unverified; test before claiming it.
-5. **Timezone without Home Assistant.** Standalone units show UTC. ESPHome's `web_server`
+4. **Timezone without Home Assistant.** Standalone units show UTC. ESPHome's `web_server`
    could expose a timezone setting, at some flash cost and with an open settings page.
    Not requested.
 6. **ESPHome display driver.** The display module uses `waveshare_epaper` (`1.54inv2`).

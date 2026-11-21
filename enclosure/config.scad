@@ -6,7 +6,7 @@
 //   z  height: 0 at the bottom surface (the USB-C end), + toward the top
 //
 // "Measured" values come from hardware/measurements.md; change them there first.
-// "Estimate" marks the few values nobody has measured yet.
+// "Nominal" marks datasheet values that only shape the models of purchased parts.
 
 // ---------------------------------------------------------------------------
 // Measured: the display (Seeed 1.54" panel on the Seeed ePaper Driver Board V2)
@@ -38,8 +38,8 @@ switch_z = [27.4, 31.6];        // slide switch pins on the +x breakout line
 
 usb_w = 8.94;                   // USB-C receptacle
 usb_t = 3.16;
-xiao_overhang = 2.7;            // estimate: the XIAO's own PCB, past the driver board's bottom edge
-usb_overhang = 5.2;             // estimate: the receptacle's face, past the driver board's bottom edge
+usb_overhang = 2.0;             // Kael, confirmed 2026-11-20: the receptacle's face, past the
+                                // driver board's bottom edge. The XIAO's own PCB is flush with that edge.
 tail_to_usb_front = 13.5;       // from the tail tips to the receptacle's front and back faces
 tail_to_usb_back = 16.5;
 
@@ -51,8 +51,10 @@ ze15_w = 22.3;                  // along the pin rows (mounted: x)
 ze15_h = 25.4;                  // across the rows (mounted: z)
 ze15_row_inset = 1.3;           // pin rows from the board edges
 ze15_depth = 24.0;              // front of the can to the pin tips
-ze15_pcb_t = 1.6;               // estimate
-ze15_pin_exposed = 3.4;         // estimate: pin length above the header's plastic strip
+sensor_depth = 26.0;            // Kael, ~26 mm: front of the can to the plug's solder, the deepest point
+ze15_pcb_t = 1.6;               // nominal
+ze15_pin_exposed = 3.4;         // nominal: pin length above the header's plastic strip (places the
+                                // plug in the model; sensor_depth sets the enclosure's depth)
 can_d = 21.0;                   // at the lip
 can_body_d = 20.0;
 can_lip_h = 1.2;
@@ -70,6 +72,7 @@ wire_d = 1.3;                   // 26 AWG, PVC
 // ---------------------------------------------------------------------------
 
 wall = 2.0;                     // sides, top and bottom
+back_clear = 2.0;               // behind the sensor's deepest point: 28 mm inside depth
 front_t = 1.6;                  // face plates
 back_t = 2.0;
 corner_r = 2.5;                 // front-view corner radius
@@ -141,7 +144,7 @@ half_in = inner_w / 2;
 half_out = outer_w / 2;
 
 // Heights
-usb_recess = 0.2;                                 // receptacle face inside the bottom surface
+usb_recess = 0.3;                                 // receptacle face inside the bottom surface
 board_z = usb_recess + usb_overhang;              // the driver board's bottom edge
 board_top_z = board_z + board_h;
 panel_z = board_z + panel_above_board;
@@ -164,8 +167,7 @@ usb_y = [rail_back_y + tail_to_usb_front, rail_back_y + tail_to_usb_back];
 ze15_pcb_y = front_t + can_h;
 ze15_spacer_back_y = front_t + ze15_depth - ze15_pin_exposed;
 plug_back_y = ze15_spacer_back_y + plug_depth;
-wires_back_y = plug_back_y + wire_d;
-inner_back_y = wires_back_y + 0.5;
+inner_back_y = front_t + sensor_depth + back_clear;
 outer_d = inner_back_y + back_t;
 
 // Holes and screws
@@ -177,7 +179,8 @@ pin_x = screw_x - 0.2;
 display_pin_z = seam_z - pin_from_seam;
 sensor_pin_z = seam_z + pin_from_seam;
 
-assert(board_z - xiao_overhang >= wall + 0.3, "the XIAO's board would hit the bottom wall");
+assert(board_z >= wall + 0.3, "the driver board and XIAO would hit the bottom wall");
+assert(plug_back_y + wire_d <= front_t + sensor_depth + 0.5, "the modelled plug is deeper than the measured sensor");
 
 echo(str("co-sensor enclosure: ", outer_w, " W x ", outer_h, " H x ", outer_d,
          " D mm (", outer_d + foot_h, " with feet)"));
